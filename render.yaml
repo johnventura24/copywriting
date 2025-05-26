@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ai-copywriting-bot
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: OPENAI_API_KEY
+        sync: false  # This will be set manually in Render dashboard
+      - key: OPENAI_MODEL
+        value: gpt-3.5-turbo 
