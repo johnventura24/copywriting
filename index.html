@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Copywriting Bot</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 36px;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 18px;
+            color: #666;
+        }
+
+        .app-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .settings-panel {
+            background-color: #f1f5f9;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .api-key-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .api-key-container input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .api-key-container small {
+            margin-left: 10px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .options-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .option-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: white;
+            font-size: 15px;
+        }
+
+        .content-area {
+            display: flex;
+            padding: 25px;
+            gap: 25px;
+        }
+
+        .input-column, .output-column {
+            flex: 1;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #334155;
+            margin-bottom: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            resize: none;
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+
+        button {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        button.copy-all {
+            background-color: transparent;
+            border: 1px solid #2563eb;
+            color: #2563eb;
+        }
+
+        button.copy-all:hover {
+            background-color: #eff6ff;
+        }
+
+        .output-container {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            background-color: #f8fafc;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        .variation {
+            background-color: white;
+            border-left: 3px solid #2563eb;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .variation-number {
+            font-weight: 600;
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            color: #2563eb;
+            border: 1px solid #2563eb;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        .copy-button:hover {
+            background-color: #eff6ff;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loader div {
+            width: 20px;
+            height: 20px;
+            background-color: #2563eb;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 5px;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loader div:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .loader div:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        .output-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .regenerate {
+            background-color: transparent;
+            border: 1px solid #2563eb;
+            color: #2563eb;
+        }
+
+        .regenerate:hover {
+            background-color: #eff6ff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* API Key Toggle Styles */
+        .api-key-section {
+            display: none;
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .api-key-toggle {
+            color: #2563eb;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .api-key-toggle:hover {
+            text-decoration: underline;
+        }
+
+        .api-key-toggle i {
+            margin-right: 5px;
+        }
+
+        .remember-container {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .remember-container input {
+            margin-right: 8px;
+        }
+
+        .remember-container label {
+            font-size: 14px;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+
+        .key-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-right: 10px;
+        }
+
+        .key-status.set {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .key-status.not-set {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Slider Styles */
+        .slider-container {
+            position: relative;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: 25px;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider-labels {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+
+        .slider-labels span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        #aggressiveness-value {
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        /* Research Data Styles */
+        .research-data-group {
+            flex: 2;
+        }
+
+        .research-data-group textarea {
+            height: 80px;
+            resize: vertical;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Copywriting Bot</h1>
+            <p>Generate creative variations of your marketing copy in seconds</p>
+        </header>
+
+        <div class="app-container">
+            <div class="settings-panel">
+                <div class="options-row">
+                    <div class="option-group">
+                        <label for="lead-type">Lead Type:</label>
+                        <select id="lead-type">
+                            <option value="">Not Applicable</option>
+                            <option value="story">Story Lead</option>
+                            <option value="proclamation">Proclamation Lead</option>
+                            <option value="secret">Secret Lead</option>
+                            <option value="problem-solution">Problem-Solution Lead</option>
+                            <option value="promise">Promise Lead</option>
+                            <option value="offer">Offer Lead</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="copywriting-style">Copywriting Style:</label>
+                        <select id="copywriting-style">
+                            <option value="">Not Applicable</option>
+                            <option value="direct-response">Direct Response</option>
+                            <option value="emotional">Emotional</option>
+                            <option value="conversational">Conversational</option>
+                            <option value="authoritative">Authoritative</option>
+                            <option value="urgency">Urgency & Scarcity</option>
+                            <option value="benefit-focused">Benefit-Focused</option>
+                            <option value="storytelling">Storytelling</option>
+                            <option value="social-proof">Social Proof</option>
+                            <option value="curiosity">Curiosity-Driven</option>
+                            <option value="fear-based">Fear-Based</option>
+                            <option value="aspirational">Aspirational</option>
+                            <option value="educational">Educational</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="medicare-benefit">Angles:</label>
+                        <select id="medicare-benefit">
+                            <option value="">None / General Copy</option>
+                            <option value="otc-cards">Medicare - OTC Cards / OTC Benefits</option>
+                            <option value="flex-cards">Medicare - Flex Cards / Flexible Benefits</option>
+                            <option value="cashback">Medicare - Cashback / Part B Giveback</option>
+                            <option value="dental">Medicare - Dental</option>
+                            <option value="vision">Medicare - Vision</option>
+                            <option value="hearing">Medicare - Hearing</option>
+                            <option value="groceries">Medicare - Groceries</option>
+                            <option value="gas-money">Medicare - Gas Money</option>
+                            <option value="savings">Medicare - Savings</option>
+                            <option value="auto-insurance">Auto - Insurance</option>
+                            <option value="auto-coverage">Auto - Coverage</option>
+                            <option value="auto-rates">Auto - Rates</option>
+                            <option value="final-expense-burial">Final Expense - Burial Insurance</option>
+                            <option value="final-expense-life">Final Expense - Life Insurance</option>
+                            <option value="final-expense-coverage">Final Expense - Coverage</option>
+                            <option value="dollar-50">Dollar Amount - $50</option>
+                            <option value="dollar-100">Dollar Amount - $100</option>
+                            <option value="dollar-150">Dollar Amount - $150</option>
+                            <option value="dollar-200">Dollar Amount - $200</option>
+                            <option value="dollar-250">Dollar Amount - $250</option>
+                            <option value="dollar-300">Dollar Amount - $300</option>
+                            <option value="dollar-400">Dollar Amount - $400</option>
+                            <option value="dollar-500">Dollar Amount - $500</option>
+                            <option value="dollar-1000">Dollar Amount - $1,000</option>
+                            <option value="dollar-1500">Dollar Amount - $1,500</option>
+                            <option value="dollar-2000">Dollar Amount - $2,000</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="num-variations">Number of Variations:</label>
+                        <select id="num-variations">
+                            <option value="3">3 Variations</option>
+                            <option value="5" selected>5 Variations</option>
+                            <option value="10">10 Variations</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="options-row">
+                    <div class="option-group">
+                        <label for="aggressiveness">Aggressiveness Level:</label>
+                        <div class="slider-container">
+                            <input type="range" id="aggressiveness" min="1" max="10" value="5" class="slider">
+                            <div class="slider-labels">
+                                <span>Subtle (1)</span>
+                                <span id="aggressiveness-value">5</span>
+                                <span>Aggressive (10)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="option-group research-data-group">
+                        <label for="research-data">Research Data (Optional):</label>
+                        <textarea id="research-data" placeholder="Enter statistics, studies, facts, or data points to include in the copy variations...
+
+Examples:
+• 87% of Medicare beneficiaries save $1,200+ annually
+• Study shows 9 out of 10 customers satisfied
+• Over 2 million members nationwide
+• Average savings of $150/month on prescriptions" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="options-row">
+                    <div class="option-group">
+                        <label for="copy-format">Copy Format:</label>
+                        <select id="copy-format">
+                            <option value="">Not Applicable</option>
+                            <option value="short-form">Short Form</option>
+                            <option value="long-form">Long Form</option>
+                            <option value="headline">Headlines</option>
+                            <option value="bullet-points">Bullet Points</option>
+                            <option value="email-subject">Email Subject Lines</option>
+                            <option value="social-media">Social Media Posts</option>
+                            <option value="ad-copy">Ad Copy</option>
+                            <option value="sales-letter">Sales Letter</option>
+                            <option value="landing-page">Landing Page</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="copywriter-style">Copywriter Style:</label>
+                        <select id="copywriter-style">
+                            <option value="">Not Applicable</option>
+                            <option value="david-ogilvy">David Ogilvy - Research-driven, factual copy</option>
+                            <option value="gary-halbert">Gary Halbert - Direct, conversational, highly persuasive</option>
+                            <option value="dan-kennedy">Dan Kennedy - No-nonsense, results-focused</option>
+                            <option value="eugene-schwartz">Eugene Schwartz - Psychologically sophisticated</option>
+                            <option value="john-caples">John Caples - Tested, proven approaches</option>
+                            <option value="claude-hopkins">Claude Hopkins - Scientific advertising</option>
+                            <option value="joe-sugarman">Joe Sugarman - Storytelling with psychological triggers</option>
+                            <option value="robert-collier">Robert Collier - Letter-writing, personal connection</option>
+                            <option value="victor-schwab">Victor Schwab - Systematic advertising principles</option>
+                            <option value="frank-kern">Frank Kern - Casual, conversational with personality</option>
+                            <option value="bill-bernbach">Bill Bernbach - Creative, witty, emotional</option>
+                            <option value="leo-burnett">Leo Burnett - Folksy wisdom, memorable storytelling</option>
+                            <option value="rosser-reeves">Rosser Reeves - USP-focused, single-minded</option>
+                            <option value="maxwell-sackheim">Maxwell Sackheim - Subscription/continuity expert</option>
+                            <option value="frank-dignan">Frank Dignan - Practical direct response</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="emotional-trigger">Emotional Trigger:</label>
+                        <select id="emotional-trigger">
+                            <option value="">Not Applicable</option>
+                            <option value="fear">Fear</option>
+                            <option value="greed">Greed</option>
+                            <option value="curiosity">Curiosity</option>
+                            <option value="urgency">Urgency</option>
+                            <option value="social-proof">Social Proof</option>
+                            <option value="authority">Authority</option>
+                            <option value="scarcity">Scarcity</option>
+                            <option value="reciprocity">Reciprocity</option>
+                            <option value="commitment">Commitment</option>
+                            <option value="liking">Liking</option>
+                            <option value="hope">Hope</option>
+                            <option value="pride">Pride</option>
+                            <option value="guilt">Guilt</option>
+                            <option value="anger">Anger</option>
+                            <option value="joy">Joy</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="input-column">
+                    <h2>Original Copy</h2>
+                    <textarea id="original-copy" placeholder="Enter your original marketing copy here..."></textarea>
+                    <button id="generate-btn">Generate Variations</button>
+                </div>
+                <div class="output-column">
+                    <div class="output-controls">
+                        <h2>Generated Variations</h2>
+                        <button class="copy-all" id="copy-all-btn">Copy All</button>
+                    </div>
+                    <div class="output-container" id="output-container">
+                        <div class="loader" id="loader">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                        <!-- Variations will appear here -->
+                    </div>
+                    <button class="regenerate" id="regenerate-btn" style="display: none; margin-top: 16px;">Regenerate</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by OpenAI's API</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const originalCopyInput = document.getElementById('original-copy');
+            const numVariationsSelect = document.getElementById('num-variations');
+            const leadTypeSelect = document.getElementById('lead-type');
+            const copywritingStyleSelect = document.getElementById('copywriting-style');
+            const medicareBenefitSelect = document.getElementById('medicare-benefit');
+            const aggressivenessSlider = document.getElementById('aggressiveness');
+            const aggressivenessValue = document.getElementById('aggressiveness-value');
+            const researchDataInput = document.getElementById('research-data');
+            const copyFormatSelect = document.getElementById('copy-format');
+            const copywriterStyleSelect = document.getElementById('copywriter-style');
+            const emotionalTriggerSelect = document.getElementById('emotional-trigger');
+            const generateBtn = document.getElementById('generate-btn');
+            const regenerateBtn = document.getElementById('regenerate-btn');
+            const copyAllBtn = document.getElementById('copy-all-btn');
+            const outputContainer = document.getElementById('output-container');
+            const loader = document.getElementById('loader');
+            
+            // API key will be fetched from server environment
+            let apiKey = '';
+            
+            // Fetch API key from server on page load
+            async function initializeApp() {
+                try {
+                    const response = await fetch('/api/config');
+                    const config = await response.json();
+                    apiKey = config.openaiApiKey;
+                    
+                    if (!apiKey) {
+                        console.warn('No OpenAI API key found in environment variables');
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch API configuration:', error);
+                }
+            }
+            
+            // Initialize the app
+            initializeApp();
+            
+            // Update aggressiveness value display
+            aggressivenessSlider.addEventListener('input', (e) => {
+                aggressivenessValue.textContent = e.target.value;
+            });
+            
+            generateBtn.addEventListener('click', generateVariations);
+            regenerateBtn.addEventListener('click', generateVariations);
+            copyAllBtn.addEventListener('click', copyAllVariations);
+            
+            // Event delegation for copy buttons
+            outputContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('copy-button')) {
+                    const variationText = e.target.closest('.variation').querySelector('p').textContent;
+                    navigator.clipboard.writeText(variationText);
+                    
+                    const originalText = e.target.textContent;
+                    e.target.textContent = 'Copied!';
+                    setTimeout(() => {
+                        e.target.textContent = originalText;
+                    }, 2000);
+                }
+            });
+            
+            async function generateVariations() {
+                const originalCopy = originalCopyInput.value.trim();
+                const numVariations = parseInt(numVariationsSelect.value);
+                const leadType = leadTypeSelect.value;
+                const copywritingStyle = copywritingStyleSelect.value;
+                const medicareBenefit = medicareBenefitSelect.value;
+                const aggressiveness = parseInt(aggressivenessSlider.value);
+                const researchData = researchDataInput.value.trim();
+                const copyFormat = copyFormatSelect.value;
+                const copywriterStyle = copywriterStyleSelect.value;
+                const emotionalTrigger = emotionalTriggerSelect.value;
+                
+                // Validate inputs
+                if (!apiKey) {
+                    alert('OpenAI API key not found. Please set the OPENAI_API_KEY environment variable on Render.com');
+                    return;
+                }
+                
+                if (!originalCopy) {
+                    alert('Please enter your original copy');
+                    return;
+                }
+                
+                // Show loader
+                loader.style.display = 'block';
+                outputContainer.querySelectorAll('.variation').forEach(el => el.remove());
+                generateBtn.disabled = true;
+                
+                try {
+                    const variations = await fetchVariationsFromAPI(apiKey, originalCopy, numVariations, leadType, copywritingStyle, medicareBenefit, aggressiveness, researchData, copyFormat, copywriterStyle, emotionalTrigger);
+                    displayVariations(variations);
+                    regenerateBtn.style.display = 'block';
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                    console.error('Error generating variations:', error);
+                } finally {
+                    loader.style.display = 'none';
+                    generateBtn.disabled = false;
+                }
+            }
+            
+            async function fetchVariationsFromAPI(apiKey, originalCopy, numVariations, leadType, copywritingStyle, medicareBenefit, aggressiveness, researchData, copyFormat, copywriterStyle, emotionalTrigger) {
+                // Define lead type descriptions based on George Felton's "Advertising: Concept and Copy"
+                const leadDescriptions = {
+                    'story': 'Story Lead - Start with a narrative, anecdote, or scenario that draws readers in emotionally before connecting to the product/service. Use storytelling elements like characters, conflict, and resolution.',
+                    'proclamation': 'Proclamation Lead - Make a bold, confident statement or declaration about the product/service. Be direct, authoritative, and attention-grabbing with strong, declarative language.',
+                    'secret': 'Secret Lead - Reveal insider information, hidden knowledge, or exclusive insights. Use phrases like "What they don\'t want you to know" or "The secret that..." to create curiosity and urgency.',
+                    'problem-solution': 'Problem-Solution Lead - Identify a specific problem your audience faces, then present your product/service as the solution. Start with the pain point before introducing the remedy.',
+                    'promise': 'Promise Lead - Make a compelling promise about what the product/service will deliver. Focus on benefits and outcomes, using confident language about what the customer will achieve or receive.',
+                    'offer': 'Offer Lead - Lead with a specific deal, discount, bonus, or limited-time offer. Make the value proposition immediately clear and create urgency around the offer.'
+                };
+
+                // Define copywriting style descriptions
+                const styleDescriptions = {
+                    'direct-response': 'Direct Response Style - Write with clear calls-to-action, immediate benefits, and measurable outcomes. Use action-oriented language, specific numbers, and create urgency for immediate response.',
+                    'emotional': 'Emotional Style - Appeal to feelings, desires, fears, and aspirations. Use sensory language, personal stories, and emotional triggers to create deep connection with the reader.',
+                    'conversational': 'Conversational Style - Write as if speaking directly to a friend. Use casual language, contractions, questions, and a warm, approachable tone that feels personal and relatable.',
+                    'authoritative': 'Authoritative Style - Establish expertise and credibility. Use confident language, industry knowledge, statistics, and professional tone to position as a trusted authority.',
+                    'urgency': 'Urgency & Scarcity Style - Create immediate action through time-sensitive offers, limited availability, and fear of missing out. Use countdown language and exclusive opportunities.',
+                    'benefit-focused': 'Benefit-Focused Style - Emphasize what the customer gains rather than product features. Focus on outcomes, results, and positive changes in the customer\'s life.',
+                    'storytelling': 'Storytelling Style - Use narrative structure with beginning, middle, and end. Include characters, conflict, and resolution to make the message memorable and engaging.',
+                    'social-proof': 'Social Proof Style - Leverage testimonials, reviews, case studies, and popularity indicators. Show that others have succeeded or chosen this option to build trust and credibility.',
+                    'curiosity': 'Curiosity-Driven Style - Create intrigue and mystery that compels readers to learn more. Use incomplete information, surprising facts, and questions that demand answers.',
+                    'fear-based': 'Fear-Based Style - Address potential negative consequences of inaction. Highlight problems, risks, and what could be lost if the reader doesn\'t take action.',
+                    'aspirational': 'Aspirational Style - Paint a picture of an ideal future state. Focus on dreams, goals, and the elevated lifestyle or status the product/service can provide.',
+                    'educational': 'Educational Style - Inform and teach while selling. Provide valuable information, explain concepts, and position the product/service as the logical solution based on the education provided.'
+                };
+                
+                // Define benefit contexts for different angles
+                const benefitContexts = {
+                    'otc-cards': 'Focus on Over-the-Counter (OTC) benefits and cards that help cover everyday health items like vitamins, pain relievers, and health products.',
+                    'flex-cards': 'Emphasize flexible spending benefits and cards that can be used for various health-related expenses and services.',
+                    'cashback': 'Highlight Part B premium giveback benefits and cashback opportunities that put money back in Medicare beneficiaries\' pockets.',
+                    'dental': 'Focus on dental coverage benefits, including cleanings, fillings, and other dental care that traditional Medicare doesn\'t cover.',
+                    'vision': 'Emphasize vision benefits including eye exams, glasses, contacts, and other vision care services.',
+                    'hearing': 'Highlight hearing aid benefits and hearing care services that help Medicare beneficiaries with hearing health.',
+                    'groceries': 'Focus on grocery benefits and allowances that help Medicare beneficiaries save money on food and household essentials.',
+                    'gas-money': 'Emphasize transportation benefits and gas allowances that help Medicare beneficiaries with travel and mobility costs.',
+                    'savings': 'Focus on overall savings opportunities and cost reductions available through Medicare Advantage plans.',
+                    'auto-insurance': 'Focus on auto insurance benefits, competitive rates, coverage options, and savings opportunities for drivers.',
+                    'auto-coverage': 'Emphasize comprehensive auto coverage, protection benefits, and peace of mind for vehicle owners.',
+                    'auto-rates': 'Highlight competitive auto insurance rates, cost savings, and affordable premium options.',
+                    'final-expense-burial': 'Focus on burial insurance and final expense coverage that helps families cover funeral costs and end-of-life expenses.',
+                    'final-expense-life': 'Emphasize life insurance for final expenses, providing financial protection and peace of mind for loved ones.',
+                    'final-expense-coverage': 'Highlight comprehensive final expense coverage that ensures dignity and reduces financial burden on families.',
+                    'dollar-50': 'Focus on the $50 dollar amount - emphasize this specific value as savings, benefits, cashback, or monthly amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-100': 'Focus on the $100 dollar amount - emphasize this specific value as savings, benefits, cashback, or monthly amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-150': 'Focus on the $150 dollar amount - emphasize this specific value as savings, benefits, cashback, or monthly amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-200': 'Focus on the $200 dollar amount - emphasize this specific value as savings, benefits, cashback, or monthly amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-250': 'Focus on the $250 dollar amount - emphasize this specific value as savings, benefits, cashback, or monthly amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-300': 'Focus on the $300 dollar amount - emphasize this specific value as savings, benefits, cashback, or monthly amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-400': 'Focus on the $400 dollar amount - emphasize this specific value as savings, benefits, cashback, or monthly amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-500': 'Focus on the $500 dollar amount - emphasize this specific value as savings, benefits, cashback, or monthly amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-1000': 'Focus on the $1,000 dollar amount - emphasize this specific value as savings, benefits, cashback, or annual amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-1500': 'Focus on the $1,500 dollar amount - emphasize this specific value as savings, benefits, cashback, or annual amounts. Make this dollar figure prominent and compelling.',
+                    'dollar-2000': 'Focus on the $2,000 dollar amount - emphasize this specific value as savings, benefits, cashback, or annual amounts. Make this dollar figure prominent and compelling.'
+                };
+                
+                // Define copy format descriptions
+                const copyFormatDescriptions = {
+                    'short-form': 'Short Form - Create concise, punchy copy under 100 words. Focus on immediate impact, clear value proposition, and strong call-to-action.',
+                    'long-form': 'Long Form - Develop detailed, comprehensive copy that builds a complete argument. Include storytelling, multiple benefits, objection handling, and thorough persuasion.',
+                    'headline': 'Headlines - Craft attention-grabbing headlines that stop readers and compel them to read more. Focus on curiosity, benefit, or urgency.',
+                    'bullet-points': 'Bullet Points - Format as clear, scannable bullet points highlighting key benefits, features, or reasons to act.',
+                    'email-subject': 'Email Subject Lines - Create compelling subject lines that increase open rates. Use curiosity, urgency, personalization, or benefit-driven language.',
+                    'social-media': 'Social Media Posts - Write engaging social media content optimized for platforms. Include hashtags, emojis, and platform-specific best practices.',
+                    'ad-copy': 'Ad Copy - Create advertising copy for paid ads. Focus on immediate attention, clear value, and strong call-to-action within character limits.',
+                    'sales-letter': 'Sales Letter - Write a complete sales letter with headline, story, benefits, social proof, objection handling, and multiple closes.',
+                    'landing-page': 'Landing Page - Structure copy for a landing page with headline, subheadline, benefits, features, testimonials, and conversion elements.'
+                };
+
+                // Define copywriter style descriptions
+                const copywriterStyleDescriptions = {
+                    'david-ogilvy': 'David Ogilvy Style - Factual, research-based copy with sophisticated language. Focus on product benefits, consumer insights, and elegant persuasion.',
+                    'gary-halbert': 'Gary Halbert Style - Direct, conversational, and highly persuasive. Use personal stories, emotional appeals, and aggressive sales techniques.',
+                    'dan-kennedy': 'Dan Kennedy Style - No-nonsense, results-focused copy with urgency and scarcity. Emphasize immediate action and clear value propositions.',
+                    'eugene-schwartz': 'Eugene Schwartz Style - Psychologically sophisticated copy that taps into deep desires and motivations. Focus on mass desires and breakthrough advertising.',
+                    'john-caples': 'John Caples Style - Tested, proven approaches with strong headlines and clear benefits. Emphasize what the product will do for the customer.',
+                    'claude-hopkins': 'Claude Hopkins Style - Scientific advertising with specific claims, reasons why, and measurable results. Focus on facts and proof.',
+                    'joe-sugarman': 'Joe Sugarman Style - Storytelling approach with psychological triggers. Create curiosity and emotional connection through narrative.',
+                    'robert-collier': 'Robert Collier Style - Letter-writing approach with personal connection. Use empathy, understanding, and relationship-building language.',
+                    'victor-schwab': 'Victor Schwab Style - Systematic approach focusing on getting attention, showing advantage, proving claims, and persuading action.',
+                    'frank-kern': 'Frank Kern Style - Casual, conversational tone with personality. Use humor, relatability, and authentic voice while maintaining persuasive power.',
+                    'bill-bernbach': 'Bill Bernbach Style - Creative, witty, and emotional copy that breaks conventional rules. Focus on clever insights, humor, and memorable creative concepts.',
+                    'leo-burnett': 'Leo Burnett Style - Folksy wisdom and memorable storytelling with human warmth. Create relatable characters and use down-to-earth language that connects emotionally.',
+                    'rosser-reeves': 'Rosser Reeves Style - USP-focused, single-minded copy that hammers one key benefit. Be direct, repetitive, and focus on unique selling propositions.',
+                    'maxwell-sackheim': 'Maxwell Sackheim Style - Subscription and continuity expert approach. Focus on ongoing value, building relationships, and long-term customer retention.',
+                    'frank-dignan': 'Frank Dignan Style - Practical, no-nonsense direct response with clear value propositions. Focus on immediate benefits and straightforward persuasion.'
+                };
+
+                // Define emotional trigger descriptions
+                const emotionalTriggerDescriptions = {
+                    'fear': 'Fear - Address what the customer might lose, miss out on, or suffer if they don\'t take action. Focus on consequences and risks.',
+                    'greed': 'Greed - Appeal to the desire for more money, savings, or financial gain. Emphasize profit, wealth building, and financial benefits.',
+                    'curiosity': 'Curiosity - Create intrigue and mystery that compels readers to learn more. Use incomplete information and compelling questions.',
+                    'urgency': 'Urgency - Create time pressure and immediate need for action. Use deadlines, limited time offers, and "act now" language.',
+                    'social-proof': 'Social Proof - Show that others have chosen this option successfully. Use testimonials, reviews, and popularity indicators.',
+                    'authority': 'Authority - Establish credibility and expertise. Use credentials, endorsements, and expert positioning.',
+                    'scarcity': 'Scarcity - Emphasize limited availability, exclusive access, or rare opportunities. Create fear of missing out.',
+                    'reciprocity': 'Reciprocity - Offer something valuable first to create obligation. Use free gifts, bonuses, or valuable information.',
+                    'commitment': 'Commitment - Get small commitments that lead to larger ones. Use consistency principle and progressive engagement.',
+                    'liking': 'Liking - Build rapport and connection. Use similarity, compliments, and shared values or experiences.',
+                    'hope': 'Hope - Paint a picture of a better future and positive outcomes. Focus on dreams, aspirations, and positive possibilities.',
+                    'pride': 'Pride - Appeal to self-image and status. Emphasize prestige, recognition, and feeling good about the choice.',
+                    'guilt': 'Guilt - Address feelings of responsibility or obligation. Focus on what should be done or moral imperatives.',
+                    'anger': 'Anger - Channel frustration with current situation toward action. Address injustices, problems, or irritations.',
+                    'joy': 'Joy - Focus on happiness, pleasure, and positive emotions. Emphasize fun, enjoyment, and feel-good benefits.'
+                };
+                
+                const leadDescription = leadDescriptions[leadType] || leadDescriptions['story'];
+                const styleDescription = styleDescriptions[copywritingStyle] || styleDescriptions['direct-response'];
+                const medicareBenefitContext = medicareBenefit ? benefitContexts[medicareBenefit] : '';
+                const copyFormatDescription = copyFormatDescriptions[copyFormat] || copyFormatDescriptions['short-form'];
+                const copywriterStyleDescription = copywriterStyleDescriptions[copywriterStyle] || copywriterStyleDescriptions['david-ogilvy'];
+                const emotionalTriggerDescription = emotionalTriggerDescriptions[emotionalTrigger] || emotionalTriggerDescriptions['curiosity'];
+                
+                // Define aggressiveness levels
+                const aggressivenessLevels = {
+                    1: 'Very Subtle - Gentle suggestions, soft language, minimal pressure',
+                    2: 'Subtle - Polite recommendations, understated benefits',
+                    3: 'Mild - Clear benefits, some persuasive language',
+                    4: 'Moderate - Confident claims, moderate urgency',
+                    5: 'Balanced - Strong benefits, balanced persuasion',
+                    6: 'Assertive - Bold claims, clear calls-to-action',
+                    7: 'Strong - Powerful language, strong urgency',
+                    8: 'Aggressive - Intense pressure, strong emotional appeals',
+                    9: 'Very Aggressive - High-pressure tactics, dramatic language',
+                    10: 'Maximum Aggressive - Extreme urgency, maximum emotional intensity'
+                };
+                
+                const aggressivenessDescription = aggressivenessLevels[aggressiveness] || aggressivenessLevels[5];
+                
+                let systemPrompt = `You are a professional copywriter expert in advertising leads from George Felton's "Advertising: Concept and Copy" and various copywriting styles. 
+
+LEAD TYPE: ${leadDescription}
+
+COPYWRITING STYLE: ${styleDescription}
+
+COPY FORMAT: ${copyFormatDescription}
+
+COPYWRITER STYLE: ${copywriterStyleDescription}
+
+EMOTIONAL TRIGGER: ${emotionalTriggerDescription}
+
+AGGRESSIVENESS LEVEL (${aggressiveness}/10): ${aggressivenessDescription}
+
+IMPORTANT: Combine ALL elements - lead type, copywriting style, copy format, copywriter style, emotional trigger, AND aggressiveness level. Each element should work together seamlessly:
+- Lead type determines how you start and structure the copy
+- Copywriting style determines the overall tone and persuasion approach  
+- Copy format determines the length, structure, and presentation
+- Copywriter style determines the specific voice and techniques
+- Emotional trigger determines the primary psychological appeal
+- Aggressiveness level determines the intensity and pressure of the language`;
+
+                if (medicareBenefitContext) {
+                    systemPrompt += `
+
+ANGLE FOCUS: ${medicareBenefitContext}
+When writing variations, incorporate this angle context naturally into the copy while maintaining both the chosen lead type and copywriting style.`;
+                }
+
+                if (researchData) {
+                    systemPrompt += `
+
+RESEARCH DATA TO INCORPORATE: ${researchData}
+Use this research data, statistics, studies, or facts naturally within the copy variations. Integrate these data points to support claims, add credibility, and strengthen the persuasive impact. Present the data in a compelling way that supports the overall message.`;
+                }
+
+                systemPrompt += `
+
+Generate ${numVariations} different variations of the provided copy combining ALL specified elements: lead type, copywriting style, copy format, copywriter style, emotional trigger, and aggressiveness level. Each variation should:
+1. Start with the lead type's specific approach (how you open and structure the copy)
+2. Apply the copywriting style throughout (tone, language, and persuasion techniques)
+3. Follow the copy format requirements (length, structure, presentation style)
+4. Embody the specific copywriter's voice and techniques
+5. Leverage the emotional trigger as the primary psychological appeal
+6. Match the aggressiveness level (intensity and pressure of language)
+7. Maintain the core message and value proposition
+8. Use unique wording and structure for each variation
+9. Be compelling and engaging
+10. Number each variation clearly (1., 2., 3., etc.)`;
+
+                if (medicareBenefitContext) {
+                    systemPrompt += `
+11. Naturally incorporate the angle focus when relevant`;
+                }
+
+                if (researchData) {
+                    systemPrompt += `
+${medicareBenefitContext ? '12' : '11'}. Integrate the provided research data to support claims and add credibility`;
+                }
+
+                systemPrompt += `
+
+Focus on making each variation distinctly different while staying true to ALL chosen elements. The lead type's opening approach, copywriting style's persuasion techniques, copy format's structure, copywriter's voice, emotional trigger's appeal, and aggressiveness level should all work together seamlessly to create powerful, cohesive copy variations.`;
+                
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: systemPrompt
+                            },
+                            {
+                                role: 'user',
+                                content: `Original copy: ${originalCopy}`
+                            }
+                        ],
+                        temperature: 0.8,
+                        max_tokens: 2000
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error.message || 'Failed to generate variations');
+                }
+                
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                
+                // Parse the response to get individual variations
+                return parseVariations(content, numVariations);
+            }
+            
+            function parseVariations(content, expectedCount) {
+                // Split by numbered variations (1., 2., etc.)
+                const regex = /\d+\.\s+/;
+                const parts = content.split(regex).filter(part => part.trim() !== '');
+                
+                // If parsing failed, return the whole content as one variation
+                if (parts.length < expectedCount) {
+                    // Try another approach with line breaks
+                    const lineBreakParts = content.split('\n\n').filter(part => part.trim() !== '');
+                    if (lineBreakParts.length >= expectedCount) {
+                        return lineBreakParts.slice(0, expectedCount);
+                    }
+                    
+                    // If all parsing attempts fail, just split the content roughly equally
+                    return [content];
+                }
+                
+                return parts.slice(0, expectedCount);
+            }
+            
+            function displayVariations(variations) {
+                outputContainer.innerHTML = '';
+                
+                variations.forEach((variation, index) => {
+                    const variationDiv = document.createElement('div');
+                    variationDiv.className = 'variation';
+                    
+                    const variationNumber = document.createElement('div');
+                    variationNumber.className = 'variation-number';
+                    variationNumber.textContent = `Variation ${index + 1}`;
+                    
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'copy-button';
+                    copyButton.textContent = 'Copy';
+                    
+                    const content = document.createElement('p');
+                    content.textContent = variation.trim();
+                    
+                    variationDiv.appendChild(variationNumber);
+                    variationDiv.appendChild(copyButton);
+                    variationDiv.appendChild(content);
+                    
+                    outputContainer.appendChild(variationDiv);
+                });
+            }
+            
+            function copyAllVariations() {
+                const allVariations = Array.from(outputContainer.querySelectorAll('.variation p'))
+                    .map((el, index) => `Variation ${index + 1}:\n${el.textContent}\n\n`)
+                    .join('');
+                
+                if (allVariations) {
+                    navigator.clipboard.writeText(allVariations);
+                    copyAllBtn.textContent = 'All Copied!';
+                    setTimeout(() => {
+                        copyAllBtn.textContent = 'Copy All';
+                    }, 2000);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
